@@ -55,6 +55,14 @@ function MaterialTable<TData extends MRT_RowData>({
   const table = useMaterialReactTable({
     data: memoizedData,
     columns: memoizedColumns,
+    paginationDisplayMode: "pages",
+    positionToolbarAlertBanner: "bottom",
+    enableFullScreenToggle: isMobileDevice(),
+
+    initialState: {
+      density: "compact",
+      isFullScreen: true,
+    },
     renderTopToolbarCustomActions: ({ table }) => (
       <Box
         sx={{
@@ -84,12 +92,6 @@ function MaterialTable<TData extends MRT_RowData>({
         </Button>
       </Box>
     ),
-    paginationDisplayMode: "pages",
-    positionToolbarAlertBanner: "bottom",
-    enableFullScreenToggle: !isMobileDevice(),
-    initialState: {
-      density: "compact",
-    },
   });
 
   return <MaterialReactTable table={table} />;
