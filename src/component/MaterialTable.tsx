@@ -2,18 +2,23 @@
 import { useMemo } from "react";
 import {
   MaterialReactTable,
-  MRT_Row,
   MRT_RowData,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button } from "@mui/material";
-
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { mkConfig, generateCsv, download } from "export-to-csv"; //or use your library of choice here
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { mkConfig, generateCsv, download } from "export-to-csv";
+import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import PrintIcon from "@mui/icons-material/Print";
 
-type MaterialTableProps<TData> = {
+type TData = {
+  [key: string]: any;
+};
+
+type MaterialTableProps = {
   data: TData[];
   columns: any;
 };
@@ -22,15 +27,80 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
+  filename: "table-data",
 });
 
-const isMobileDevice = () => window.innerWidth <= 768;
+function MaterialTable({ data, columns }: MaterialTableProps) {
+  // Print Function
+  const handlePrint = () => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
 
-function MaterialTable<TData extends MRT_RowData>({
-  data,
-  columns,
-}: MaterialTableProps<TData>) {
-  const handleExportRows = (rows: MRT_Row<any>[]) => {
+    const tableHeaders = columns.map((col: { header: string }) => col.header);
+    const tableRows = data.map((row) => Object.values(row));
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Print Table</title>
+          <style>
+            table {
+              border-collapse: collapse;
+              width: 100%;
+              margin-bottom: 1rem;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+            @media print {
+              table { page-break-inside: auto; }
+              tr { page-break-inside: avoid; page-break-after: auto; }
+              thead { display: table-header-group; }
+            }
+          </style>
+        </head>
+        <body>
+          <table>
+            <thead>
+              <tr>
+                ${tableHeaders
+                  .map((header: any) => `<th>${header}</th>`)
+                  .join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows
+                .map(
+                  (row) => `
+                <tr>
+                  ${row.map((cell) => `<td>${cell}</td>`).join("")}
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.print();
+      printWindow.onafterprint = () => {
+        printWindow.close();
+      };
+    };
+  };
+  // PDF Export Function
+  const handleExportPDF = (rows: MRT_RowData[]) => {
     const doc = new jsPDF();
     const tableData = rows.map((row) => Object.values(row.original));
     const tableHeaders = columns.map((c: { header: any }) => c.header);
@@ -41,12 +111,44 @@ function MaterialTable<TData extends MRT_RowData>({
       body: tableData,
     });
 
-    doc.save("mrt-pdf-example.pdf");
+    doc.save("table-export.pdf");
   };
 
-  const handleExportData = () => {
-    const csv = generateCsv(csvConfig)(data);
-    download(csvConfig)(csv);
+  // CSV Export Function
+  const handleExportCSV = () => {
+    try {
+      const csv = generateCsv(csvConfig)(data);
+      download(csvConfig)(csv);
+    } catch (error) {
+      console.error("CSV Export failed:", error);
+    }
+  };
+
+  // Excel Export Function
+  const handleExportExcel = () => {
+    try {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+      XLSX.writeFile(workbook, "table-data.xlsx");
+    } catch (error) {
+      console.error("Excel Export failed:", error);
+    }
+  };
+
+  // Copy to Clipboard Function
+  const handleCopyToClipboard = async () => {
+    try {
+      const headers = columns
+        .map((col: { header: string }) => col.header)
+        .join("\t");
+      const rows = data.map((row) => Object.values(row).join("\t")).join("\n");
+      const textToCopy = `${headers}\n${rows}`;
+
+      await navigator.clipboard.writeText(textToCopy);
+    } catch (error) {
+      console.error("Copy to clipboard failed:", error);
+    }
   };
 
   const memoizedData = useMemo(() => data, [data]);
@@ -57,39 +159,32 @@ function MaterialTable<TData extends MRT_RowData>({
     columns: memoizedColumns,
     paginationDisplayMode: "pages",
     positionToolbarAlertBanner: "bottom",
-    enableFullScreenToggle: isMobileDevice(),
-
     initialState: {
       density: "compact",
-      isFullScreen: true,
+      isFullScreen: false,
     },
     renderTopToolbarCustomActions: ({ table }) => (
-      <Box
-        sx={{
-          display: "flex",
-          gap: "16px",
-          padding: "8px",
-          flexWrap: "wrap",
-        }}
-      >
-        <Button
-          //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
-          onClick={handleExportData}
-          startIcon={<FileDownloadIcon />}
-        >
+      <Box sx={{ display: "flex", gap: "1rem", p: "4px" }}>
+        <Button onClick={handlePrint} startIcon={<PrintIcon />}>
+          Print
+        </Button>
+        <Button onClick={handleExportCSV} startIcon={<FileDownloadIcon />}>
           CSV
         </Button>
-
+        <Button onClick={handleExportExcel} startIcon={<FileDownloadIcon />}>
+          Excel
+        </Button>
         <Button
-          disabled={table.getPrePaginationRowModel().rows.length === 0}
-          //export all rows, including from the next page, (still respects filtering and sorting)
-          onClick={() =>
-            handleExportRows(table.getPrePaginationRowModel().rows)
-          }
+          onClick={() => handleExportPDF(table.getPrePaginationRowModel().rows)}
           startIcon={<FileDownloadIcon />}
         >
-          pDF
+          PDF
         </Button>
+        <Tooltip title="Copy to clipboard">
+          <IconButton onClick={handleCopyToClipboard}>
+            <ContentCopyIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
     ),
   });
