@@ -9,6 +9,9 @@ type Person = {
   score: number;
   isActive: boolean;
   notes: string;
+  position: string;
+  department: string;
+  projectsAssigned: number;
 };
 
 export const personColumns: MRT_ColumnDef<Person>[] = [
@@ -49,5 +52,20 @@ export const personColumns: MRT_ColumnDef<Person>[] = [
     accessorKey: "notes",
     header: "Notes",
     size: 250,
+  },
+  {
+    accessorKey: "role",
+    header: "Position",
+    size: 150,
+  },
+  {
+    accessorKey: "department",
+    header: "Department",
+    size: 150,
+  },
+  {
+    accessorKey: "address",
+    header: "Address",
+    size: 120,
   },
 ];

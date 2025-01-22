@@ -8,7 +8,6 @@ import {
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { mkConfig, generateCsv, download } from "export-to-csv";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -22,13 +21,6 @@ type MaterialTableProps = {
   data: TData[];
   columns: any;
 };
-
-const csvConfig = mkConfig({
-  fieldSeparator: ",",
-  decimalSeparator: ".",
-  useKeysAsHeaders: true,
-  filename: "table-data",
-});
 
 function MaterialTable({ data, columns }: MaterialTableProps) {
   // Print Function
@@ -114,16 +106,6 @@ function MaterialTable({ data, columns }: MaterialTableProps) {
     doc.save("table-export.pdf");
   };
 
-  // CSV Export Function
-  const handleExportCSV = () => {
-    try {
-      const csv = generateCsv(csvConfig)(data);
-      download(csvConfig)(csv);
-    } catch (error) {
-      console.error("CSV Export failed:", error);
-    }
-  };
-
   // Excel Export Function
   const handleExportExcel = () => {
     try {
@@ -168,9 +150,7 @@ function MaterialTable({ data, columns }: MaterialTableProps) {
         <Button onClick={handlePrint} startIcon={<PrintIcon />}>
           Print
         </Button>
-        <Button onClick={handleExportCSV} startIcon={<FileDownloadIcon />}>
-          CSV
-        </Button>
+
         <Button onClick={handleExportExcel} startIcon={<FileDownloadIcon />}>
           Excel
         </Button>
