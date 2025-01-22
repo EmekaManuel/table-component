@@ -141,24 +141,39 @@ function MaterialTable({ data, columns }: MaterialTableProps) {
     columns: memoizedColumns,
     paginationDisplayMode: "pages",
     positionToolbarAlertBanner: "bottom",
+    // enableDensityToggle: false,
+    // enableColumnFilters: false,
+    // enableFullScreenToggle: false,
+    // enableColumnFilterModes: false,
+    // enableSortingRemoval: false,
+
+    // enableGlobalFilter: false,
+
     initialState: {
       density: "compact",
       isFullScreen: false,
     },
     renderTopToolbarCustomActions: ({ table }) => (
-      <Box sx={{ display: "flex", gap: "1rem", p: "4px" }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: "16px",
+          padding: "8px",
+          flexWrap: "wrap",
+        }}
+      >
         <Button onClick={handlePrint} startIcon={<PrintIcon />}>
           Print
         </Button>
 
         <Button onClick={handleExportExcel} startIcon={<FileDownloadIcon />}>
-          Excel
+          Export Excel
         </Button>
         <Button
           onClick={() => handleExportPDF(table.getPrePaginationRowModel().rows)}
           startIcon={<FileDownloadIcon />}
         >
-          PDF
+          Export PDF
         </Button>
         <Tooltip title="Copy to clipboard">
           <IconButton onClick={handleCopyToClipboard}>
