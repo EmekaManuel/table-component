@@ -175,11 +175,9 @@ function MaterialTable({ data, columns }: MaterialTableProps) {
         >
           Export PDF
         </Button>
-        <Tooltip title="Copy to clipboard">
-          <IconButton onClick={handleCopyToClipboard}>
-            <ContentCopyIcon />
-          </IconButton>
-        </Tooltip>
+        <Button onClick={handleCopyToClipboard} startIcon={<ContentCopyIcon />}>
+          Copy Data{" "}
+        </Button>
       </Box>
     ),
   });
