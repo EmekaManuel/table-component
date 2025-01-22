@@ -107,76 +107,6 @@ function App() {
           </Typography>
         </Box>
 
-        {/* Stats Cards */}
-        <Grid
-          container
-          spacing={{ xs: 2, sm: 2.5, md: 3 }}
-          sx={{ mb: { xs: 2, sm: 3, md: 4 } }}
-        >
-          {statsCards.map((card, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: { xs: 2, sm: 2.5, md: 3 },
-                  borderRadius: 2,
-                  bgcolor: "background.default",
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "start",
-                    mb: { xs: 1, sm: 1.5, md: 2 },
-                  }}
-                >
-                  <Typography
-                    color="text.secondary"
-                    variant="subtitle2"
-                    sx={{
-                      fontSize: {
-                        xs: "0.8rem",
-                        sm: "0.875rem",
-                      },
-                    }}
-                  >
-                    {card.title}
-                  </Typography>
-                  {card.icon}
-                </Box>
-                <Typography
-                  variant={isMobile ? "h5" : "h4"}
-                  sx={{
-                    mb: 1,
-                    fontSize: {
-                      xs: "1.25rem",
-                      sm: "1.5rem",
-                      md: "2rem",
-                    },
-                  }}
-                >
-                  {card.value}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    fontSize: {
-                      xs: "0.75rem",
-                      sm: "0.875rem",
-                    },
-                  }}
-                >
-                  {card.change}
-                </Typography>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-
         {/* Quick Summary Cards */}
         <Card sx={{ mb: { xs: 2, sm: 3, md: 4 } }}>
           <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
@@ -301,6 +231,7 @@ function App() {
           sx={{
             overflowX: "auto",
             width: "100%",
+            paddingBottom: { xs: "10px", sm: "20px" }, // Adjust for smaller screens
           }}
         >
           <MaterialTable data={dummyArray} columns={personColumns} />
