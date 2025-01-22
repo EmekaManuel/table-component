@@ -35,7 +35,7 @@ export const personColumns: MRT_ColumnDef<Person>[] = [
     header: "Registered On",
     size: 200,
     Cell: ({ cell }) =>
-      new Date(cell.getValue() as string).toLocaleDateString(), // Formatting date
+      new Date(cell.getValue() as string).toLocaleDateString(),
   },
   {
     accessorKey: "score",
